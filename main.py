@@ -6,7 +6,6 @@ def f(x):
 
 
 def rectangle_method(left, right, func, eps=0.001):
-
     def divide_sum(number_of_splits):
         nonlocal left, right, func
         step = (right - left) / float(number_of_splits)
@@ -19,7 +18,7 @@ def rectangle_method(left, right, func, eps=0.001):
     steps *= 2
     second_split = divide_sum(steps)
 
-    while abs(first_split - second_split) > eps :
+    while abs(first_split - second_split) > eps:
         steps *= 2
         first_split = divide_sum(steps)
         steps *= 2
@@ -41,32 +40,29 @@ def trapezoidal_rule(left, right, func, eps=0.001):
         for i in range(1, n):
             sum += func(x)
             x += h
+        sum *= 2
+        sum += (func(left) + func(right))
         prev_result = result
-        result = (result + h * sum) / 2
+        result = (h * sum) / 2
 
     print(result, n)
 
 
-def simpson_rule(left, right, func, eps):
-    """
-    Calculates the definite integral of a function between left and right limits
-    using Simpson's rule with a given precision.
-    """
-    n = 2  # start with two intervals
-    h = (right - left) / n
-    prev_result = 0
-    result = h / 3 * (func(left) + 4 * func((left + right) / 2) + func(right))
-    while abs(result - prev_result) > eps:
-        prev_result = result
-        n *= 2
-        h = (right - left) / n
-        x = [left + i * h for i in range(n + 1)]
-        y = [func(x[i]) for i in range(n + 1)]
-        result = h / 3 * sum([y[0] + 4 * y[i] + 2 * y[i+1] + y[n] for i in range(1, n, 2)])
+def simpson(left, right, function, n):
+    h = (right - left) / (2 * n)
 
-    print(result, n)
+    tmp_sum = float(function(left)) + \
+              float(function(right))
+
+    for step in range(1, 2 * n):
+        if step % 2 != 0:
+            tmp_sum += 4 * float(function(left + step * h))
+        else:
+            tmp_sum += 2 * float(function(left + step * h))
+
+    print(tmp_sum * h / 3)
 
 
-rectangle_method(5, 10, f, 0.00001)
-trapezoidal_rule(5, 10, f, 0.001)
-simpson_rule(5, 10, f, 0.0001)
+rectangle_method(5, 10, f, 0.0000001)
+trapezoidal_rule(5, 10, f, 0.00000000001)
+simpson(5, 10, f, 2**23)
