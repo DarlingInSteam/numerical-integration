@@ -51,7 +51,7 @@ def trapezoidal_rule(left, right, func, eps=0.001):
 def simpson_method(left, right, function, epsilon):
     n = 2
     h = (right - left) / (2 * n)
-
+    step = 0
     prev_sum = 0
     tmp_sum = float(function(left)) + \
               float(function(right))
@@ -71,10 +71,9 @@ def simpson_method(left, right, function, epsilon):
         n *= 2
         h /= 2
 
-    print(tmp_sum, step)
+    print(tmp_sum, step+1)
 
 
-
-rectangle_method(5, 10, f, 0.00001)
+rectangle_method(5, 10, f, 0.000001)
 trapezoidal_rule(5, 10, f, 0.000001)
-simpson_method(5, 10, f, 0.000000001)
+simpson_method(5, 10, f,   0.000001)
