@@ -47,7 +47,26 @@ def trapezoidal_rule(left, right, func, eps=0.001):
     print(result, n)
 
 
+def simpson_rule(left, right, func, eps):
+    """
+    Calculates the definite integral of a function between left and right limits
+    using Simpson's rule with a given precision.
+    """
+    n = 2  # start with two intervals
+    h = (right - left) / n
+    prev_result = 0
+    result = h / 3 * (func(left) + 4 * func((left + right) / 2) + func(right))
+    while abs(result - prev_result) > eps:
+        prev_result = result
+        n *= 2
+        h = (right - left) / n
+        x = [left + i * h for i in range(n + 1)]
+        y = [func(x[i]) for i in range(n + 1)]
+        result = h / 3 * sum([y[0] + 4 * y[i] + 2 * y[i+1] + y[n] for i in range(1, n, 2)])
+
+    print(result, n)
+
+
 rectangle_method(5, 10, f, 0.00001)
 trapezoidal_rule(5, 10, f, 0.001)
-
-
+simpson_rule(5, 10, f, 0.0001)
