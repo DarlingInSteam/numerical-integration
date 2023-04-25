@@ -174,11 +174,11 @@ def trapezoidal_rule_with_runge(left, right, func, eps=0.001):
     print(result, n)
 
 
-rectangle_method(5, 10, f, 0.000001)
-rectangle_method_with_runge(5, 10, f, 0.000001)
+rectangle_method(5, 10, f, 0.01)
+rectangle_method_with_runge(5, 10, f, 0.01)
 print('')
-trapezoidal_rule(5, 10, f, 0.000001)
-trapezoidal_rule_with_runge(5, 10, f, 0.000001)
+trapezoidal_rule(5, 10, f, 0.01)
+trapezoidal_rule_with_runge(5, 10, f, 0.01)
 print('')
-simpson_method(5, 10, f, 0.0000001)
-simpson_method_with_runge(5, 10, f, 0.0000001)
+simpson_method(5, 10, f, 0.01)
+simpson_method_with_runge(5, 10, f, 0.01)
