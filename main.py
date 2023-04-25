@@ -105,17 +105,15 @@ def simpson_method_with_runge(left, right, function, epsilon):
         # используем метод Рунге для уточнения результата
         double_n = 2 * n
         double_h = h / 2
-        double_sum = float(function(left)) + \
-                     float(function(right))
+        double_sum = 0
 
-        for step in range(1, 2 * double_n):
-            if step % 2 != 0:
-                double_sum += 4 * float(function(left + step * double_h))
-            else:
-                double_sum += 2 * float(function(left + step * double_h))
+        for step in range(0, double_n):
+            x = left + (2 * step + 1) * double_h
+            double_sum += function(x)
 
-        double_sum *= double_h / 3
-        error = abs(tmp_sum - double_sum) / 15
+        double_sum *= 2*double_h / 3
+        error = abs(tmp_sum - double_sum) / (2**4 - 1)
+
 
         if error > epsilon:
             n *= 2
@@ -173,6 +171,9 @@ def trapezoidal_rule_with_runge(left, right, func, eps=0.001):
 
     print(result, n)
 
+
+print("Общий ожидаемый результат - 5.3706082686966")
+print('')
 
 print("-rectangle method-")
 print("With eps = 0.01")
