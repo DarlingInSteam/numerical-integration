@@ -5,234 +5,109 @@ def f(x):
     return math.log(x) / math.sqrt(1.2 + 0.3 * x)
 
 
-def rectangle_method(left, right, func, eps=0.001):
-    def divide_sum(number_of_splits):
-        nonlocal left, right, func
-        step = (right - left) / float(number_of_splits)
-        sum_in_step = sum([func(left + k * step + step/2) for k in range(0, number_of_splits)])
-        result_in_step = step * sum_in_step
-        return result_in_step
-
-    steps = 2
-    first_split = divide_sum(steps)
-    steps *= 2
-    second_split = divide_sum(steps)
-
-    while abs(first_split - second_split) > eps:
-        steps *= 2
-        first_split = divide_sum(steps)
-        steps *= 2
-        second_split = divide_sum(steps)
-
-    print(second_split, steps)
+def is_runge(sh, shr, eps, r, p):
+    return (abs(sh - shr) / ((r ** p) - 1)) < eps
 
 
-def rectangle_method_with_runge(left, right, func, eps=0.001):
-    def divide_sum(number_of_splits):
-        nonlocal left, right, func
-        step = (right - left) / float(number_of_splits)
-        sum_in_step = sum([func(left + k * step + step/2) for k in range(0, number_of_splits)])
-        result_in_step = step * sum_in_step
-        return result_in_step
+def main(a, b, eps1, eps2):
+    print("a = ", a)
+    print("b = ", b, end="\n\n")
 
-    steps = 2
-    first_split = divide_sum(steps)
-    steps *= 2
-    second_split = divide_sum(steps)
+    print("sh = ", rect_runge(a, b, eps1))
+    print("sh = ", rect_runge(a, b, eps2), end="\n\n")
 
-    while abs(first_split - second_split) > eps:
-        steps *= 2
-        first_split = divide_sum(steps)
-        steps *= 2
-        second_split = divide_sum(steps)
+    print("sh = ", simpson_runge(a, b, eps1))
+    print("sh = ", simpson_runge(a, b, eps2), end="\n\n")
 
-        # Runge rule
-        runge_sum = divide_sum(steps * 2)
-        error = abs(runge_sum - second_split) / 3
-        if error > eps:
-            steps *= 2
-
-    print(second_split, steps)
+    print("sh = ", trapezoidal_runge(a, b, eps1))
+    print("sh = ", trapezoidal_runge(a, b, eps2), end="\n\n")
 
 
-def simpson_method(left, right, function, epsilon):
-    n = 2
-    h = (right - left) / (2 * n)
-    step = 0
-    prev_sum = 0
-    tmp_sum = float(function(left)) + \
-              float(function(right))
+def rect_runge(a, b, eps):
+    print("l rectangle")
+    print("eps = ", eps)
+    h = b - a
+    r = 2
+    sh = rectangle_method(a, b, f, h)
+    h /= r
+    shr = rectangle_method(a, b, f, h)
 
-    while abs(tmp_sum - prev_sum) > epsilon:
-        prev_sum = tmp_sum
-        tmp_sum = float(function(left)) + \
-                  float(function(right))
-
-        for step in range(1, 2 * n):
-            if step % 2 != 0:
-                tmp_sum += 4 * float(function(left + step * h))
-            else:
-                tmp_sum += 2 * float(function(left + step * h))
-
-        tmp_sum *= h / 3
-        n *= 2
-        h /= 2
-
-    print(tmp_sum, step+1)
+    while not is_runge(sh, shr, eps, r, 1):
+        sh = rectangle_method(a, b, f, h)
+        h /= r
+        shr = rectangle_method(a, b, f, h)
+    print("h = ", h)
+    return sh
 
 
-def simpson_method_with_runge(left, right, function, epsilon):
-    n = 2
-    h = (right - left) / (2 * n)
-    step = 0
-    prev_sum = 0
-    tmp_sum = float(function(left)) + \
-              float(function(right))
+def simpson_runge(a, b, eps):
+    print("simpson")
+    print("eps = ", eps)
+    h = (b - a) / 2
+    r = 2
+    sh = simpson_method(a, b, f, h)
+    h /= r
+    shr = simpson_method(a, b, f, h)
 
-    while abs(tmp_sum - prev_sum) > epsilon:
-        prev_sum = tmp_sum
-        tmp_sum = float(function(left)) + \
-                  float(function(right))
-
-        for step in range(1, 2 * n):
-            if step % 2 != 0:
-                tmp_sum += 4 * float(function(left + step * h))
-            else:
-                tmp_sum += 2 * float(function(left + step * h))
-
-        tmp_sum *= h / 3
-
-        # используем метод Рунге для уточнения результата
-        double_n = 2 * n
-        double_h = h / 2
-        double_sum = 0
-
-        for step in range(0, double_n):
-            x = left + (2 * step + 1) * double_h
-            double_sum += function(x)
-
-        double_sum *= 2*double_h / 3
-        error = abs(tmp_sum - double_sum) / (2**4 - 1)
+    while not is_runge(sh, shr, eps, r, 4):
+        sh = simpson_method(a, b, f, h)
+        h /= r
+        shr = simpson_method(a, b, f, h)
+    print("h = ", h)
+    return sh
 
 
-        if error > epsilon:
-            n *= 2
-            h /= 2
+def trapezoidal_runge(a, b, eps):
+    print("trapezoidal")
+    print("eps = ", eps)
+    h = (b - a)
+    r = 2
+    sh = trapezoidal_method(a, b, f, h)
+    h /= r
+    shr = trapezoidal_method(a, b, f, h)
 
-    print(tmp_sum, step)
-
-
-def trapezoidal_rule(left, right, func, eps=0.001):
-    n = 1
-    prev_result = 0
-    result = (right - left) * (func(left) + func(right)) / 2
-
-    while abs(result - prev_result) > eps:
-        n *= 2
-        h = (right - left) / n
-        x = left + h
-        sum = 0
-        for i in range(1, n):
-            sum += func(x)
-            x += h
-        sum *= 2
-        sum += (func(left) + func(right))
-        prev_result = result
-        result = (h * sum) / 2
-
-    print(result, n)
+    while not is_runge(sh, shr, eps, r, 2):
+        sh = trapezoidal_method(a, b, f, h)
+        h /= r
+        shr = trapezoidal_method(a, b, f, h)
+    print("h = ", h)
+    return sh
 
 
-def trapezoidal_rule_with_runge(left, right, func, eps=0.001):
-    n = 1
-    prev_result = 0
-    result = (right - left) * (func(left) + func(right)) / 2
-
-    while abs(result - prev_result) > eps:
-        n *= 2
-        h = (right - left) / n
-        x = left + h
-        sum = 0
-        for i in range(1, n):
-            sum += func(x)
-            x += h
-        sum *= 2
-        sum += (func(left) + func(right))
-        prev_result = result
-        result = (h * sum) / 2
-        
-        # оценка погрешности по методу Рунге
-        error = abs(result - prev_result) / 3
-        
-        # уменьшение шага, если погрешность больше заданной
-        if error > eps:
-            n *= 2
-            h /= 2
-
-    print(result, n)
+def rectangle_method(left, right, func, h):
+    res = 0
+    n = int((right - left) / h)
+    for i in range(n):
+        x = left + i * h
+        res += h * func(x)
+    return res
 
 
-print("Общий ожидаемый результат - 5.3706082686966")
-print('')
-
-print("-rectangle method-")
-print("With eps = 0.01")
-rectangle_method(5, 10, f, 0.01)
-rectangle_method_with_runge(5, 10, f, 0.01)
-print('')
-print("With eps = 0.001")
-rectangle_method(5, 10, f, 0.001)
-rectangle_method_with_runge(5, 10, f, 0.001)
-print('')
-print("With eps = 0.0001")
-rectangle_method(5, 10, f, 0.0001)
-rectangle_method_with_runge(5, 10, f, 0.0001)
-print('')
-print("With eps = 0.00001")
-rectangle_method(5, 10, f, 0.00001)
-rectangle_method_with_runge(5, 10, f, 0.00001)
-print("-rectangle method-")
+def simpson_method(left, right, func, h):
+    res = 0
+    n = int((right - left) / h)
+    for i in range(n + 1):
+        x = left + i * h
+        if i == 0 or i == n:
+            res += func(x)
+        elif i % 2 == 0:
+            res += 2 * func(x)
+        else:
+            res += 4 * func(x)
+    return res * h / 3
 
 
-print('')
+def trapezoidal_method(left, right, func, h):
+    res = 0
+    n = int((right - left) / h)
+    x = left
+
+    for i in range(n):
+        res += (func(x) + func(x + h)) * h / 2
+        x += h
+
+    return res
 
 
-print("-trapezoidal rule-")
-print("With eps = 0.01")
-trapezoidal_rule(5, 10, f, 0.01)
-trapezoidal_rule_with_runge(5, 10, f, 0.01)
-print('')
-print("With eps = 0.001")
-trapezoidal_rule(5, 10, f, 0.001)
-trapezoidal_rule_with_runge(5, 10, f, 0.001)
-print('')
-print("With eps = 0.0001")
-trapezoidal_rule(5, 10, f, 0.0001)
-trapezoidal_rule_with_runge(5, 10, f, 0.0001)
-print('')
-print("With eps = 0.00001")
-trapezoidal_rule(5, 10, f, 0.00001)
-trapezoidal_rule_with_runge(5, 10, f, 0.00001)
-print("-trapezoidal rule-")
-
-
-print('')
-
-
-print("-simpson method-")
-print("With eps = 0.01")
-simpson_method(5, 10, f, 0.01)
-simpson_method_with_runge(5, 10, f, 0.01)
-print('')
-print("With eps = 0.001")
-simpson_method(5, 10, f, 0.001)
-simpson_method_with_runge(5, 10, f, 0.001)
-print('')
-print("With eps = 0.0001")
-simpson_method(5, 10, f, 0.0001)
-simpson_method_with_runge(5, 10, f, 0.0001)
-print('')
-print("With eps = 0.00001")
-simpson_method(5, 10, f, 0.00001)
-simpson_method_with_runge(5, 10, f, 0.00001)
-print("-simpson method-")
+if __name__ == "__main__":
+    main(5, 10, 0.01, 0.001)
